@@ -5,6 +5,9 @@ services:
     image: langgenius/dify-api:0.6.1
     restart: always
     environment:
+      # Notion import configuration, support public and internal
+      NOTION_INTEGRATION_TYPE=internal
+      NOTION_INTERNAL_SECRET=secret_U0RFmKXtfstaMeng1l1c0sREIVd2w12zAE498cG5gKo
       # Startup mode, 'api' starts the API server.
       MODE: api
       # The log level for the application. Supported values are `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`
