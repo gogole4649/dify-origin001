@@ -11,6 +11,8 @@ import {
 } from 'react'
 import { useTranslation } from 'react-i18next'
 import { debounce } from 'lodash-es'
+import classNames from 'classnames'
+import { useShallow } from 'zustand/react/shallow'
 import type {
   ChatConfig,
   ChatItem,
@@ -25,6 +27,7 @@ import { ChatContextProvider } from './context'
 import type { Emoji } from '@/app/components/tools/types'
 import Button from '@/app/components/base/button'
 import { StopCircle } from '@/app/components/base/icons/src/vender/solid/mediaAndDevices'
+import AgentLogModal from '@/app/components/base/agent-log-modal'
 import PromptLogModal from '@/app/components/base/prompt-log-modal'
 import { useStore as useAppStore } from '@/app/components/app/store'
 
@@ -36,7 +39,7 @@ export type ChatProps = {
   onStopResponding?: () => void
   noChatInput?: boolean
   onSend?: OnSend
-  chatContainerclassName?: string
+  chatContainerClassName?: string
   chatContainerInnerClassName?: string
   chatFooterClassName?: string
   chatFooterInnerClassName?: string
@@ -51,6 +54,7 @@ export type ChatProps = {
   chatNode?: ReactNode
   onFeedback?: (messageId: string, feedback: Feedback) => void
   chatAnswerContainerInner?: string
+  hideProcessDetail?: boolean
 }
 const Chat: FC<ChatProps> = ({
   config,
@@ -60,7 +64,7 @@ const Chat: FC<ChatProps> = ({
   noStopResponding,
   onStopResponding,
   noChatInput,
-  chatContainerclassName,
+  chatContainerClassName,
   chatContainerInnerClassName,
   chatFooterClassName,
   chatFooterInnerClassName,
@@ -75,9 +79,17 @@ const Chat: FC<ChatProps> = ({
   chatNode,
   onFeedback,
   chatAnswerContainerInner,
+  hideProcessDetail,
 }) => {
   const { t } = useTranslation()
-  const { currentLogItem, setCurrentLogItem, showPromptLogModal, setShowPromptLogModal } = useAppStore()
+  const { currentLogItem, setCurrentLogItem, showPromptLogModal, setShowPromptLogModal, showAgentLogModal, setShowAgentLogModal } = useAppStore(useShallow(state => ({
+    currentLogItem: state.currentLogItem,
+    setCurrentLogItem: state.setCurrentLogItem,
+    showPromptLogModal: state.showPromptLogModal,
+    setShowPromptLogModal: state.setShowPromptLogModal,
+    showAgentLogModal: state.showAgentLogModal,
+    setShowAgentLogModal: state.setShowAgentLogModal,
+  })))
   const [width, setWidth] = useState(0)
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const chatContainerInnerRef = useRef<HTMLDivElement>(null)
@@ -171,7 +183,7 @@ const Chat: FC<ChatProps> = ({
       <div className='relative h-full'>
         <div
           ref={chatContainerRef}
-          className={`relative h-full overflow-y-auto ${chatContainerclassName}`}
+          className={classNames('relative h-full overflow-y-auto', chatContainerClassName)}
         >
           {chatNode}
           <div
@@ -194,6 +206,7 @@ const Chat: FC<ChatProps> = ({
                       allToolIcons={allToolIcons}
                       showPromptLog={showPromptLog}
                       chatAnswerContainerInner={chatAnswerContainerInner}
+                      hideProcessDetail={hideProcessDetail}
                     />
                   )
                 }
@@ -255,6 +268,16 @@ const Chat: FC<ChatProps> = ({
             onCancel={() => {
               setCurrentLogItem()
               setShowPromptLogModal(false)
+            }}
+          />
+        )}
+        {showAgentLogModal && (
+          <AgentLogModal
+            width={width}
+            currentLogItem={currentLogItem}
+            onCancel={() => {
+              setCurrentLogItem()
+              setShowAgentLogModal(false)
             }}
           />
         )}

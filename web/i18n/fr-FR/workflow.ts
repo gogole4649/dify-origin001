@@ -46,6 +46,9 @@ const translation = {
       content: 'La variable est utilisée dans d\'autres nœuds. Voulez-vous toujours la supprimer ?',
     },
     insertVarTip: 'Appuyez sur la touche \'/\' pour insérer rapidement',
+    processData: 'Traiter les données',
+    input: 'Entrée',
+    output: 'Sortie',
   },
   errorMsg: {
     fieldRequired: '{{field}} est requis',
@@ -245,6 +248,15 @@ const translation = {
         'header': 'En-tête',
       },
       insertVarPlaceholder: 'tapez \'/\' pour insérer une variable',
+      timeout: {
+        title: 'Délai d\'expiration',
+        connectLabel: 'Délai de connexion',
+        connectPlaceholder: 'Entrez le délai de connexion en secondes',
+        readLabel: 'Délai de lecture',
+        readPlaceholder: 'Entrez le délai de lecture en secondes',
+        writeLabel: 'Délai d\'écriture',
+        writePlaceholder: 'Entrez le délai d\'écriture en secondes',
+      },
     },
     code: {
       inputVars: 'Variables d\'entrée',
@@ -315,6 +327,9 @@ const translation = {
     questionClassifiers: {
       model: 'modèle',
       inputVars: 'Variables d\'entrée',
+      outputVars: {
+        className: 'Nom de la classe',
+      },
       class: 'Classe',
       classNamePlaceholder: 'Écrivez votre nom de classe',
       advancedSetting: 'Paramètre avancé',

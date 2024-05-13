@@ -17,6 +17,7 @@ import type { ModerationService } from '@/models/common'
 import { TransferMethod, type VisionFile, type VisionSettings } from '@/types/app'
 import { NodeRunningStatus, WorkflowRunningStatus } from '@/app/components/workflow/types'
 import type { WorkflowProcess } from '@/app/components/base/chat/types'
+import { sleep } from '@/utils'
 
 export type IResultProps = {
   isWorkflow: boolean
@@ -179,16 +180,16 @@ const Result: FC<IResultProps> = ({
       onShowRes()
 
     setRespondingTrue()
-    const startTime = Date.now()
-    let isTimeout = false
-    const runId = setInterval(() => {
-      if (Date.now() - startTime > 1000 * 60) { // 1min timeout
-        clearInterval(runId)
+    let isEnd = false
+    let isTimeout = false;
+    (async () => {
+      await sleep(1000 * 60) // 1min timeout
+      if (!isEnd) {
         setRespondingFalse()
         onCompleted(getCompletionRes(), taskId, false)
         isTimeout = true
       }
-    }, 1000)
+    })()
 
     if (isWorkflow) {
       sendWorkflowMessage(
@@ -200,6 +201,7 @@ const Result: FC<IResultProps> = ({
               status: WorkflowRunningStatus.Running,
               tracing: [],
               expand: false,
+              resultText: '',
             })
             setRespondingFalse()
           },
@@ -234,7 +236,7 @@ const Result: FC<IResultProps> = ({
               notify({ type: 'error', message: data.error })
               setRespondingFalse()
               onCompleted(getCompletionRes(), taskId, false)
-              clearInterval(runId)
+              isEnd = true
               return
             }
             setWorkflowProccessData(produce(getWorkflowProccessData()!, (draft) => {
@@ -242,14 +244,24 @@ const Result: FC<IResultProps> = ({
             }))
             if (!data.outputs)
               setCompletionRes('')
-            else if (Object.keys(data.outputs).length > 1)
-              setCompletionRes(data.outputs)
             else
-              setCompletionRes(data.outputs[Object.keys(data.outputs)[0]])
+              setCompletionRes(data.outputs)
             setRespondingFalse()
             setMessageId(tempMessageId)
             onCompleted(getCompletionRes(), taskId, true)
-            clearInterval(runId)
+            isEnd = true
+          },
+          onTextChunk: (params) => {
+            const { data: { text } } = params
+            setWorkflowProccessData(produce(getWorkflowProccessData()!, (draft) => {
+              draft.resultText += text
+            }))
+          },
+          onTextReplace: (params) => {
+            const { data: { text } } = params
+            setWorkflowProccessData(produce(getWorkflowProccessData()!, (draft) => {
+              draft.resultText = text
+            }))
           },
         },
         isInstalledApp,
@@ -269,7 +281,7 @@ const Result: FC<IResultProps> = ({
           setRespondingFalse()
           setMessageId(tempMessageId)
           onCompleted(getCompletionRes(), taskId, true)
-          clearInterval(runId)
+          isEnd = true
         },
         onMessageReplace: (messageReplace) => {
           res = [messageReplace.answer]
@@ -280,7 +292,7 @@ const Result: FC<IResultProps> = ({
             return
           setRespondingFalse()
           onCompleted(getCompletionRes(), taskId, false)
-          clearInterval(runId)
+          isEnd = true
         },
       }, isInstalledApp, installedAppInfo?.id)
     }
@@ -320,13 +332,14 @@ const Result: FC<IResultProps> = ({
       taskId={isCallBatchAPI ? ((taskId as number) < 10 ? `0${taskId}` : `${taskId}`) : undefined}
       controlClearMoreLikeThis={controlClearMoreLikeThis}
       isShowTextToSpeech={isShowTextToSpeech}
+      hideProcessDetail
     />
   )
 
   return (
     <div className={cn(isNoData && !isCallBatchAPI && 'h-full')}>
       {!isCallBatchAPI && (
-        (isResponding && (!completionRes || !isWorkflow))
+        (isResponding && !completionRes)
           ? (
             <div className='flex h-full w-full justify-center items-center'>
               <Loading type='area' />

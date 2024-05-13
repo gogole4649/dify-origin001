@@ -55,6 +55,8 @@ class SimplePromptTransform(PromptTransform):
                    memory: Optional[TokenBufferMemory],
                    model_config: ModelConfigWithCredentialsEntity) -> \
             tuple[list[PromptMessage], Optional[list[str]]]:
+        inputs = {key: str(value) for key, value in inputs.items()}
+
         model_mode = ModelMode.value_of(model_config.mode)
         if model_mode == ModelMode.CHAT:
             prompt_messages, stops = self._get_chat_model_prompt_messages(
@@ -232,8 +234,8 @@ class SimplePromptTransform(PromptTransform):
                     )
                 ),
                 max_token_limit=rest_tokens,
-                ai_prefix=prompt_rules['human_prefix'] if 'human_prefix' in prompt_rules else 'Human',
-                human_prefix=prompt_rules['assistant_prefix'] if 'assistant_prefix' in prompt_rules else 'Assistant'
+                human_prefix=prompt_rules['human_prefix'] if 'human_prefix' in prompt_rules else 'Human',
+                ai_prefix=prompt_rules['assistant_prefix'] if 'assistant_prefix' in prompt_rules else 'Assistant'
             )
 
             # get prompt

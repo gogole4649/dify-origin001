@@ -233,7 +233,10 @@ class Tool(BaseModel, ABC):
                     ToolParameter.ToolParameterType.STRING, 
                     ToolParameter.ToolParameterType.SELECT,
                 ] and not isinstance(tool_parameters[parameter.name], str):
-                    tool_parameters[parameter.name] = str(tool_parameters[parameter.name])
+                    if tool_parameters[parameter.name] is None:
+                        tool_parameters[parameter.name] = ''
+                    else:
+                        tool_parameters[parameter.name] = str(tool_parameters[parameter.name])
                 elif parameter.type == ToolParameter.ToolParameterType.NUMBER \
                     and not isinstance(tool_parameters[parameter.name], int | float):
                     if isinstance(tool_parameters[parameter.name], str):
@@ -241,10 +244,27 @@ class Tool(BaseModel, ABC):
                             tool_parameters[parameter.name] = int(tool_parameters[parameter.name])
                         except ValueError:
                             tool_parameters[parameter.name] = float(tool_parameters[parameter.name])
+                    elif isinstance(tool_parameters[parameter.name], bool):
+                        tool_parameters[parameter.name] = int(tool_parameters[parameter.name])
+                    elif tool_parameters[parameter.name] is None:
+                        tool_parameters[parameter.name] = 0
                 elif parameter.type == ToolParameter.ToolParameterType.BOOLEAN:
                     if not isinstance(tool_parameters[parameter.name], bool):
-                        tool_parameters[parameter.name] = bool(tool_parameters[parameter.name])
-
+                        # check if it is a string
+                        if isinstance(tool_parameters[parameter.name], str):
+                            # check true false
+                            if tool_parameters[parameter.name].lower() in ['true', 'false']:
+                                tool_parameters[parameter.name] = tool_parameters[parameter.name].lower() == 'true'
+                            # check 1 0
+                            elif tool_parameters[parameter.name] in ['1', '0']:
+                                tool_parameters[parameter.name] = tool_parameters[parameter.name] == '1'
+                            else:
+                                tool_parameters[parameter.name] = bool(tool_parameters[parameter.name])
+                        elif isinstance(tool_parameters[parameter.name], int | float):
+                            tool_parameters[parameter.name] = tool_parameters[parameter.name] != 0
+                        else:
+                            tool_parameters[parameter.name] = bool(tool_parameters[parameter.name])
+                            
         return tool_parameters
 
     @abstractmethod

@@ -46,6 +46,9 @@ const translation = {
       content: 'Цю змінну використовується в інших вузлах. Ви все ще хочете її видалити?',
     },
     insertVarTip: 'Натисніть клавішу "/" для швидкого вставлення',
+    processData: 'Обробка даних',
+    input: 'Вхід',
+    output: 'Вихід',
   },
   errorMsg: {
     fieldRequired: '{{field}} є обов\'язковим',
@@ -245,6 +248,15 @@ const translation = {
         'header': 'Заголовок',
       },
       insertVarPlaceholder: 'наберіть \'/\' для вставки змінної',
+      timeout: {
+        title: 'Час вичерпано',
+        connectLabel: 'Тайм-аут з’єднання',
+        connectPlaceholder: 'Введіть час тайм-ауту з’єднання у секундах',
+        readLabel: 'Тайм-аут читання',
+        readPlaceholder: 'Введіть час тайм-ауту читання у секундах',
+        writeLabel: 'Тайм-аут запису',
+        writePlaceholder: 'Введіть час тайм-ауту запису у секундах',
+      },
     },
     code: {
       inputVars: 'Вхідні змінні',
@@ -315,6 +327,9 @@ const translation = {
     questionClassifiers: {
       model: 'модель',
       inputVars: 'Вхідні змінні',
+      outputVars: {
+        className: 'Назва класу',
+      },
       class: 'Клас',
       classNamePlaceholder: 'Напишіть назву вашого класу',
       advancedSetting: 'Розширена настройка',

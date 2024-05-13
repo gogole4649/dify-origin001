@@ -5,18 +5,25 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { useStore } from '../../store'
+import {
+  useStore,
+  useWorkflowStore,
+} from '../../store'
+import { useWorkflowRun } from '../../hooks'
 import UserInput from './user-input'
 import Chat from '@/app/components/base/chat/chat'
 import type { ChatItem } from '@/app/components/base/chat/types'
 import { fetchConvesationMessages } from '@/service/debug'
 import { useStore as useAppStore } from '@/app/components/app/store'
 import Loading from '@/app/components/base/loading'
+import { XClose } from '@/app/components/base/icons/src/vender/line/general'
 
 const ChatRecord = () => {
   const [fetched, setFetched] = useState(false)
   const [chatList, setChatList] = useState([])
   const appDetail = useAppStore(s => s.appDetail)
+  const workflowStore = useWorkflowStore()
+  const { handleLoadBackupDraft } = useWorkflowRun()
   const historyWorkflowData = useStore(s => s.historyWorkflowData)
   const currentConversationID = historyWorkflowData?.conversation_id
 
@@ -35,7 +42,7 @@ const ChatRecord = () => {
           content: item.answer,
           feedback: item.feedback,
           isAnswer: true,
-          citation: item.retriever_resources,
+          citation: item.metadata?.retriever_resources,
           message_files: item.message_files?.filter((file: any) => file.belongs_to === 'assistant') || [],
           workflow_run_id: item.workflow_run_id,
         })
@@ -79,12 +86,23 @@ const ChatRecord = () => {
         <>
           <div className='shrink-0 flex items-center justify-between p-4 pb-1 text-base font-semibold text-gray-900'>
             {`TEST CHAT#${historyWorkflowData?.sequence_number}`}
+            <div
+              className='flex justify-center items-center w-6 h-6 cursor-pointer'
+              onClick={() => {
+                handleLoadBackupDraft()
+                workflowStore.setState({ historyWorkflowData: undefined })
+              }}
+            >
+              <XClose className='w-4 h-4 text-gray-500' />
+            </div>
           </div>
           <div className='grow h-0'>
             <Chat
-              config={{} as any}
+              config={{
+                supportCitationHitInfo: true,
+              } as any}
               chatList={chatMessageList}
-              chatContainerclassName='px-4'
+              chatContainerClassName='px-4'
               chatContainerInnerClassName='pt-6'
               chatFooterClassName='px-4 rounded-b-2xl'
               chatFooterInnerClassName='pb-4'

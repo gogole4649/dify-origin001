@@ -46,6 +46,9 @@ const translation = {
       content: 'Biến được sử dụng trong các nút khác. Bạn vẫn muốn xóa nó?',
     },
     insertVarTip: 'Nhấn phím \'/\' để chèn nhanh',
+    processData: 'Xử lý dữ liệu',
+    input: 'Nhập',
+    output: 'Đầu ra',
   },
   errorMsg: {
     fieldRequired: '{{field}} là bắt buộc',
@@ -245,6 +248,15 @@ const translation = {
         'header': 'Tiêu đề',
       },
       insertVarPlaceholder: 'nhập \'/\' để chèn biến',
+      timeout: {
+        title: 'Hết thời gian',
+        connectLabel: 'Hết thời gian kết nối',
+        connectPlaceholder: 'Nhập thời gian kết nối bằng giây',
+        readLabel: 'Hết thời gian đọc',
+        readPlaceholder: 'Nhập thời gian đọc bằng giây',
+        writeLabel: 'Hết thời gian ghi',
+        writePlaceholder: 'Nhập thời gian ghi bằng giây',
+      },
     },
     code: {
       inputVars: 'Biến đầu vào',
@@ -315,6 +327,9 @@ const translation = {
     questionClassifiers: {
       model: 'mô hình',
       inputVars: 'Biến đầu vào',
+      outputVars: {
+        className: 'Tên phân loại',
+      },
       class: 'Lớp',
       classNamePlaceholder: 'Viết tên lớp của bạn',
       advancedSetting: 'Cài đặt Nâng cao',

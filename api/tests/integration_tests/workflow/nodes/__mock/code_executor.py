@@ -1,15 +1,19 @@
 import os
-import pytest
+from typing import Literal, Optional
 
-from typing import Literal
+import pytest
 from _pytest.monkeypatch import MonkeyPatch
+from jinja2 import Template
+
 from core.helper.code_executor.code_executor import CodeExecutor
+from core.helper.code_executor.entities import CodeDependency
 
 MOCK = os.getenv('MOCK_SWITCH', 'false') == 'true'
 
 class MockedCodeExecutor:
     @classmethod
-    def invoke(cls, language: Literal['python3', 'javascript', 'jinja2'], code: str, inputs: dict) -> dict:
+    def invoke(cls, language: Literal['python3', 'javascript', 'jinja2'], 
+               code: str, inputs: dict, dependencies: Optional[list[CodeDependency]] = None) -> dict:
         # invoke directly
         if language == 'python3':
             return {
@@ -17,7 +21,7 @@ class MockedCodeExecutor:
             }
         elif language == 'jinja2':
             return {
-                "result": "3"
+                "result": Template(code).render(inputs)
             }
 
 @pytest.fixture
@@ -26,6 +30,6 @@ def setup_code_executor_mock(request, monkeypatch: MonkeyPatch):
         yield
         return
 
-    monkeypatch.setattr(CodeExecutor, "execute_code", MockedCodeExecutor.invoke)
+    monkeypatch.setattr(CodeExecutor, "execute_workflow_code_template", MockedCodeExecutor.invoke)
     yield
     monkeypatch.undo()

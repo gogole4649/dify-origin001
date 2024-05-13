@@ -6,7 +6,6 @@ import {
 } from 'react'
 import { useTranslation } from 'react-i18next'
 import { produce, setAutoFreeze } from 'immer'
-import dayjs from 'dayjs'
 import type {
   ChatConfig,
   ChatItem,
@@ -20,6 +19,7 @@ import { ssePost } from '@/service/base'
 import { replaceStringWithValues } from '@/app/components/app/configuration/prompt-value-panel'
 import type { Annotation } from '@/models/log'
 import { WorkflowRunningStatus } from '@/app/components/workflow/types'
+import useTimestamp from '@/hooks/use-timestamp'
 
 type GetAbortController = (abortController: AbortController) => void
 type SendCallback = {
@@ -78,6 +78,7 @@ export const useChat = (
   stopChat?: (taskId: string) => void,
 ) => {
   const { t } = useTranslation()
+  const { formatTime } = useTimestamp()
   const { notify } = useToastContext()
   const connversationId = useRef('')
   const hasStopResponded = useRef(false)
@@ -229,7 +230,7 @@ export const useChat = (
 
     // answer
     const responseItem: ChatItem = {
-      id: `${Date.now()}`,
+      id: placeholderAnswerId,
       content: '',
       agent_thoughts: [],
       message_files: [],
@@ -322,6 +323,7 @@ export const useChat = (
                 }
                 draft[index] = {
                   ...draft[index],
+                  content: newResponseItem.answer,
                   log: [
                     ...newResponseItem.message,
                     ...(newResponseItem.message[newResponseItem.message.length - 1].role !== 'assistant'
@@ -335,9 +337,15 @@ export const useChat = (
                       : []),
                   ],
                   more: {
-                    time: dayjs.unix(newResponseItem.created_at).format('hh:mm A'),
+                    time: formatTime(newResponseItem.created_at, 'hh:mm A'),
                     tokens: newResponseItem.answer_tokens + newResponseItem.message_tokens,
                     latency: newResponseItem.provider_response_latency.toFixed(2),
+                  },
+                  // for agent log
+                  conversationId: connversationId.current,
+                  input: {
+                    inputs: newResponseItem.inputs,
+                    query: newResponseItem.query,
                   },
                 }
               }
@@ -460,7 +468,10 @@ export const useChat = (
           }))
         },
         onNodeStarted: ({ data }) => {
-          responseItem.workflowProcess!.tracing!.push(data as any)
+          responseItem.workflowProcess!.tracing!.push({
+            ...data,
+            status: WorkflowRunningStatus.Running,
+          } as any)
           handleUpdateChatList(produce(chatListRef.current, (draft) => {
             const currentIndex = draft.findIndex(item => item.id === responseItem.id)
             draft[currentIndex] = {
@@ -491,6 +502,7 @@ export const useChat = (
     promptVariablesConfig,
     handleUpdateChatList,
     handleResponding,
+    formatTime,
   ])
 
   const handleAnnotationEdited = useCallback((query: string, answer: string, index: number) => {
